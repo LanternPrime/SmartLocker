@@ -1,0 +1,24 @@
+{
+  "version": 4,
+  "configurations": [
+    {
+      "name": "STM32",
+      "compilerPath": "P:/STM32Cube/CubeCLT/STM32CubeCLT_1.21.0/GNU-tools-for-STM32/bin/arm-none-eabi-gcc.exe",
+      "intelliSenseMode": "windows-gcc-arm",
+      "cStandard": "c11",
+      "cppStandard": "c++17",
+      "defines": [
+        "STM32F411xE"
+      ],
+      "includePath": [
+        "${workspaceFolder}/Drivers/inc/"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}/Drivers/inc/"
+        ],
+        "limitSymbolsToIncludedHeaders": false
+      }
+    }
+  ]
+}

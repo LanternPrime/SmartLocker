@@ -1,0 +1,16 @@
+{
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format"
+  },
+  "editor.formatOnSave": true,
+  "C_Cpp.formatting": "disabled",
+  "clang-format.executable": "P:/LLVM/bin/clang-format.exe",   
+  "C_Cpp.default.configurationProvider": "ms-vscode.cpptools",
+  "C_Cpp.intelliSenseEngine": "default",
+  "C_Cpp.autocomplete": "default",
+  "files.associations": {
+    "*.h": "c",
+    "*.c": "c"
+  },
+  "editor.gotoLocation.multipleDefinitions": "goto"
+}
