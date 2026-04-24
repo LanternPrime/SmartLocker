@@ -1,0 +1,58 @@
+# =========================================================
+# STM32CubeIDE / Eclipse
+# =========================================================
+Debug/
+Release/
+.metadata/
+.settings/
+
+# Build artifacts
+*.o
+*.d
+*.elf
+*.bin
+*.hex
+*.map
+*.list
+*.su
+*.cyclo
+*.siz
+
+# STM32CubeIDE generated backup/temp
+*.launch
+*.bak
+*.tmp
+*.log
+
+# =========================================================
+# VS Code
+# =========================================================
+.vscode/*.log
+.vscode/.browse.VC.db*
+.vscode/ipch/
+
+# Keep useful VSCode configs
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/c_cpp_properties.json
+!.vscode/extensions.json
+
+# =========================================================
+# CMake / Ninja if you use them later
+# =========================================================
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+.ninja_deps
+.ninja_log
+*.ninja
+
+# =========================================================
+# OS files
+# =========================================================
+.DS_Store
+Thumbs.db
+desktop.ini
