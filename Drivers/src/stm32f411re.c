@@ -33,7 +33,7 @@
 
 #include "stm32f411re.h"
 
-void NVIC_IRQConfig(uint8_t IRQNum, uint8_t ENoDI)
+void NVIC_IRQConfig(IRQn_Type IRQNum, uint8_t ENoDI)
 {
     uint8_t reg_index = IRQNum >> 5;
     uint8_t bit_pos   = IRQNum % 32;
@@ -48,7 +48,7 @@ void NVIC_IRQConfig(uint8_t IRQNum, uint8_t ENoDI)
     }
 }
 
-void NVIC_IRQPriorityConfig(uint8_t IRQNum, uint8_t IRQPriority)
+void NVIC_IRQPriorityConfig(IRQn_Type IRQNum, uint8_t IRQPriority)
 {
     uint8_t iprn  = IRQNum >> 2;
     uint8_t index = IRQNum % 4;
@@ -57,4 +57,21 @@ void NVIC_IRQPriorityConfig(uint8_t IRQNum, uint8_t IRQPriority)
 
     *(NVIC_IPR0 + iprn) &= ~(0xFU << msb_shift);
     *(NVIC_IPR0 + iprn) |= (IRQPriority << msb_shift);
+}
+
+void Systick_Init(size_t tick_hz)
+{
+    uint32_t reload_value = (HSI_CLOCK / tick_hz) - 1;
+
+    // Clean the reload Value
+    *SYST_RVR &= ~(0x00FFFFFFU);
+    // Set the reload value;
+    *SYST_RVR |= (reload_value & 0x00FFFFFFU);
+
+    // enable the exception and indicate the clock source
+    *SYST_CSR |= (1 << 1); // TICKINT = Enables SysTick Exception
+    *SYST_CSR |= (1 << 2); // CLKSOURCE = (processor clock)
+
+    // Enable the counter
+    *SYST_CSR |= (1 << 0);
 }

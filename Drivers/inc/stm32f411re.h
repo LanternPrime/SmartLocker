@@ -34,9 +34,13 @@
 #ifndef INC_STM32F4XX_H_
 #define INC_STM32F4XX_H_
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define __s_inline static inline
 #define __vo       volatile
+
+#define HSI_CLOCK 16000000U
 
 // ARM CORTEX Mx Processor NVIC ISERx Register Addr
 #define NVIC_ISER0 ((__vo uint32_t*)0xE000E100)
@@ -44,6 +48,9 @@
 #define NVIC_ICER0 ((__vo uint32_t*)0XE000E180)
 // ARM CORTEX Mx Processor NVIC IPRx Register Addr
 #define NVIC_IPR0 ((__vo uint32_t*)0xE000E400)
+// ARM CORTEX Mx Processor Systick Register Addr
+#define SYST_CSR ((__vo uint32_t*)0xE000E010)
+#define SYST_RVR ((__vo uint32_t*)0xE000E014)
 
 // AHBx and APBx Bus Peripheral base Addrs
 
@@ -63,7 +70,7 @@
 #define RCC_ADDR   (AHB1_ADDR + 0x3800)
 
 // Base Addr of peripherals which are hanging on APB2 bus
-#define EXT1_ADDR   (APB2_ADDR + 0x3C00)
+#define EXTI_ADDR   (APB2_ADDR + 0x3C00)
 #define SYSCFG_ADDR (APB2_ADDR + 0x3800)
 
 // Peripheral Register Definition Structures
@@ -145,7 +152,7 @@ typedef struct
 
 #define RCC ((RCC_Reg_t*)RCC_ADDR)
 
-#define EXTI   ((EXTI_Reg_t*)EXT1_ADDR)
+#define EXTI   ((EXTI_Reg_t*)EXTI_ADDR)
 #define SYSCFG ((SYSCFG_Reg_t*)SYSCFG_ADDR)
 
 // CLK EN Macros for GPIOx Peripherals
@@ -158,15 +165,19 @@ typedef struct
 #define SYSCFG_PCKL_EN() (RCC->APB2ENR |= (1 << 14))
 
 // IRQ (Interrupt Request) Numbers of STM32F411RETx MCU
-
-#define IRQ_NO_EXTI0     6
-#define IRQ_NO_EXTI1     7
-#define IRQ_NO_EXTI2     8
-#define IRQ_NO_EXTI3     9
-#define IRQ_NO_EXTI4     10
-#define IRQ_NO_EXTI9_5   23
-#define IRQ_NO_EXTI15_10 40
-
+typedef enum
+{
+    /******  Cortex-M4 Processor Exceptions Numbers ****************************************************************/
+    SysTick_IRQn = -1, /*!< 15 Cortex-M4 System Tick Interrupt                                */
+    /******  STM32 specific Interrupt Numbers **********************************************************************/
+    EXTI0_IRQn     = 6,  /*!< EXTI Line0 Interrupt                                              */
+    EXTI1_IRQn     = 7,  /*!< EXTI Line1 Interrupt                                              */
+    EXTI2_IRQn     = 8,  /*!< EXTI Line2 Interrupt                                              */
+    EXTI3_IRQn     = 9,  /*!< EXTI Line3 Interrupt                                              */
+    EXTI4_IRQn     = 10, /*!< EXTI Line4 Interrupt                                              */
+    EXTI9_5_IRQn   = 23, /*!< External Line[9:5] Interrupts                                     */
+    EXTI15_10_IRQn = 40, /*!< External Line[15:10] Interrupts                                   */
+} IRQn_Type;
 /******************************************************************************************
  *Bit position definitions of GPIO peripheral
  ******************************************************************************************/
@@ -181,7 +192,7 @@ typedef struct
 #define FLAG_RESET RESET
 #define FLAG_SET   SET
 
-void NVIC_IRQConfig(uint8_t IRQNum, uint8_t ENoDI);
-void NVIC_IRQPriorityConfig(uint8_t IRQNum, uint8_t IRQPriority);
-
+void NVIC_IRQConfig(IRQn_Type IRQNum, uint8_t ENoDI);
+void NVIC_IRQPriorityConfig(IRQn_Type IRQNum, uint8_t IRQPriority);
+void Systick_Init(size_t tick_hz);
 #endif /* INC_STM32F4XX_H_ */

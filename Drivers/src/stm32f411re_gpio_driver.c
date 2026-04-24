@@ -70,6 +70,8 @@ void GPIO_Init(GPIO_Handle_t* hgpio)
 
         // 3.Enable the EXTI Interrupt Delivery using IMR (INTERRUPT MASK REGISTER)
         EXTI->IMR |= (1 << hgpio->GPIO_PinConfig.GPIO_PinNum);
+
+        GPIO_IRQConfig(hgpio);
     }
 
     // CONFIGURE SPEED
@@ -120,8 +122,21 @@ void GPIO_DigitalPin(uint8_t mode, GPIOx_Reg_t* port, uint8_t pin)
     GPIO_Init(&hGPIO);
 }
 
-void GPIO_IRQHandling(uint8_t PinNum)
+void GPIO_IRQConfig(GPIO_Handle_t* hgpio)
 {
-    if (EXTI->PR & (1 << PinNum))
-        EXTI->PR |= (1 << PinNum);
+    uint8_t pin = hgpio->GPIO_PinConfig.GPIO_PinNum;
+
+    // CONFIGURE EXTI
+    if (pin <= 4)
+        NVIC_IRQConfig(EXTI0_IRQn + pin, ENABLE);
+    else if (pin <= 9)
+        NVIC_IRQConfig(EXTI9_5_IRQn, ENABLE);
+    else
+        NVIC_IRQConfig(EXTI15_10_IRQn, ENABLE);
+}
+
+void GPIO_IRQHandling(GPIO_Handle_t* hgpio)
+{
+    if (EXTI->PR & (1 << hgpio->GPIO_PinConfig.GPIO_PinNum))
+        EXTI->PR |= (1 << hgpio->GPIO_PinConfig.GPIO_PinNum);
 }

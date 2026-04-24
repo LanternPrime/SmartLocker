@@ -20,6 +20,9 @@
 #include "stm32f411re_gpio_driver.h"
 
 __vo uint8_t g_button_flag = RESET;
+__vo uint8_t g_led1_flag   = RESET;
+__vo uint8_t g_led2_flag   = RESET;
+__vo uint8_t g_led3_flag   = RESET;
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
 #warning \
@@ -33,15 +36,18 @@ void delay(void)
 
 void GPIO_PinConfig(void)
 {
-    GPIO_DigitalPin(GPIO_MODE_OUT, GPIOA, GPIO_PIN5);
-    GPIO_DigitalPin(GPIO_MODE_IT_FT, GPIOC, GPIO_PIN13);
-    NVIC_IRQConfig(IRQ_NO_EXTI15_10, ENABLE);
+    GPIO_DigitalPin(GPIO_MODE_OUT, GPIOA, GPIO_PIN5);    // USER_LED
+    GPIO_DigitalPin(GPIO_MODE_IT_FT, GPIOC, GPIO_PIN13); // USER_BTN
+    GPIO_DigitalPin(GPIO_MODE_OUT, GPIOA, GPIO_PIN8);    // LED RED
+    GPIO_DigitalPin(GPIO_MODE_OUT, GPIOA, GPIO_PIN9);    // LED GREEN
+    GPIO_DigitalPin(GPIO_MODE_OUT, GPIOC, GPIO_PIN8);    // BUZZER
+    NVIC_IRQConfig(EXTI15_10_IRQn, ENABLE);
 }
 
 int main(void)
 {
+    Systick_Init(1);
     GPIO_PinConfig();
-
     /* Loop forever */
     while (1)
     {
@@ -50,6 +56,16 @@ int main(void)
             GPIO_ToggleOutputPin(GPIOA, GPIO_PIN5);
             g_button_flag = RESET;
         }
+        if (g_led1_flag >= 3)
+        {
+            GPIO_ToggleOutputPin(GPIOA, GPIO_PIN8);
+            g_led1_flag = RESET;
+        }
+        if (g_led2_flag >= 5)
+        {
+            GPIO_ToggleOutputPin(GPIOA, GPIO_PIN9);
+            g_led2_flag = RESET;
+        }
     }
 }
 
@@ -57,4 +73,11 @@ void EXTI15_10_IRQHandler()
 {
     GPIO_IRQHandling(GPIO_PIN13);
     g_button_flag = SET;
+}
+
+void SysTick_Handler()
+{
+    g_led1_flag++;
+    g_led2_flag++;
+    g_led3_flag++;
 }

@@ -8,11 +8,11 @@
 
 #include "stm32f411re.h"
 
-#define SET_REG(reg, value, pin_num, n)                   \
-    do                                                    \
-    {                                                     \
-        (reg) &= ~(((1u << (n)) - 1) << (n * (pin_num))); \
-        (reg) |= ((value) << ((n) * (pin_num)));          \
+#define SET_REG(reg, value, pin_num, n)                                \
+    do                                                                 \
+    {                                                                  \
+        (reg) &= ~(((1u << (n)) - 1) << (n * (pin_num)));              \
+        (reg) |= (((value) & ((1U << (n)) - 1)) << ((n) * (pin_num))); \
     } while (0u)
 
 #define SINGLE_REG 1
@@ -35,12 +35,6 @@ typedef struct GPIO_Handle_t
     GPIOx_Reg_t*     pGPIOx; // Holds the base addr of the GPIO port to which pin belongs
     GPIO_PinConfig_t GPIO_PinConfig;
 } GPIO_Handle_t;
-
-typedef enum GPIO_Status_t
-{
-    GPIO_OK    = 0,
-    GPIO_ERROR = 1
-} GPIO_Status_t;
 
 /*
  * @GPIO_PIN_NUM
@@ -118,4 +112,5 @@ void    GPIO_WriteToOutputPin(GPIOx_Reg_t* pGPIOx, uint8_t PinNum, uint8_t value
 void    GPIO_ToggleOutputPin(GPIOx_Reg_t* pGPIOx, uint8_t PinNum);
 
 // IRQ Config & Handling
-void GPIO_IRQHandling(uint8_t PinNum);
+void GPIO_IRQConfig(GPIO_Handle_t* hgpio);
+void GPIO_IRQHandling(GPIO_Handle_t* hgpio);
