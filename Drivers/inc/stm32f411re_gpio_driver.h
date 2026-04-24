@@ -113,4 +113,9 @@ void    GPIO_ToggleOutputPin(GPIOx_Reg_t* pGPIOx, uint8_t PinNum);
 
 // IRQ Config & Handling
 void GPIO_IRQConfig(GPIO_Handle_t* hgpio);
-void GPIO_IRQHandling(GPIO_Handle_t* hgpio);
+void GPIO_IRQHandling(uint8_t pinNum);
+
+/*
+ * Application callback
+ */
+void GPIO_ApplicationEventCallback(uint8_t pinNum);

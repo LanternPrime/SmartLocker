@@ -39,6 +39,7 @@
 
 #define __s_inline static inline
 #define __vo       volatile
+#define __weak     __attribute__((weak))
 
 #define HSI_CLOCK 16000000U
 

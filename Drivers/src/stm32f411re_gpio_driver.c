@@ -135,8 +135,12 @@ void GPIO_IRQConfig(GPIO_Handle_t* hgpio)
         NVIC_IRQConfig(EXTI15_10_IRQn, ENABLE);
 }
 
-void GPIO_IRQHandling(GPIO_Handle_t* hgpio)
+void GPIO_IRQHandling(uint8_t pinNum)
 {
-    if (EXTI->PR & (1 << hgpio->GPIO_PinConfig.GPIO_PinNum))
-        EXTI->PR |= (1 << hgpio->GPIO_PinConfig.GPIO_PinNum);
+    if (EXTI->PR & (1 << pinNum))
+        EXTI->PR |= (1 << pinNum);
+
+    GPIO_ApplicationEventCallback(pinNum);
 }
+
+__weak void USART_ApplicationEventCallback(uint8_t pinNum) {}
