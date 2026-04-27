@@ -98,8 +98,8 @@ typedef struct GPIO_Handle_t
 #define GPIO_PIN_PD  2
 
 // APIs supported by this driver
-// Peripheral Clock Enable
-void GPIO_PeriClockEN(GPIOx_Reg_t* pGPIOx, uint8_t ENoDI);
+// Peripheral Clock Control
+void GPIO_PeriClockControl(GPIOx_Reg_t* pGPIOx, uint8_t ENoDI);
 
 // Init & De-init
 void GPIO_Init(GPIO_Handle_t* hgpio);

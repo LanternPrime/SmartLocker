@@ -18,11 +18,15 @@
 
 #include "stm32f411re.h"
 #include "stm32f411re_gpio_driver.h"
+#include "stm32f411re_usart_driver.h"
 
-__vo uint8_t g_button_flag = RESET;
-__vo uint8_t g_led1_flag   = RESET;
-__vo uint8_t g_led2_flag   = RESET;
-__vo uint8_t g_led3_flag   = RESET;
+__vo uint8_t g_led1_flag = RESET;
+__vo uint8_t g_led2_flag = RESET;
+__vo uint8_t g_led3_flag = RESET;
+
+USART_Handle_t husart6;
+uint8_t        txData[1024] = "Octavio Piña USART data\r\n";
+uint8_t        rxBuffer[32];
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
 #warning \
@@ -41,21 +45,57 @@ void GPIO_PinConfig(void)
     GPIO_DigitalPin(GPIO_MODE_OUT, GPIOA, GPIO_PIN8);    // LED RED
     GPIO_DigitalPin(GPIO_MODE_OUT, GPIOA, GPIO_PIN9);    // LED GREEN
     GPIO_DigitalPin(GPIO_MODE_OUT, GPIOC, GPIO_PIN8);    // BUZZER
-    NVIC_IRQConfig(EXTI15_10_IRQn, ENABLE);
+}
+/*
+ * PC6 -> TX
+ * PC7 -> RX
+ * */
+
+void USART2_GPIOInits(void)
+{
+    GPIO_Handle_t USART2Pins;
+    USART2Pins.pGPIOx                            = GPIOC;
+    USART2Pins.GPIO_PinConfig.GPIO_PinMode       = GPIO_MODE_ALTFUN;
+    USART2Pins.GPIO_PinConfig.GPIO_PinAltFunMode = 8;
+    USART2Pins.GPIO_PinConfig.GPIO_PinOPType     = GPIO_OPT_PP;
+    USART2Pins.GPIO_PinConfig.GPIO_PinPuPdCtlr   = GPIO_PIN_PU;
+    USART2Pins.GPIO_PinConfig.GPIO_PinSpeed      = GPIO_SPEED_FST;
+
+    // TX
+    USART2Pins.GPIO_PinConfig.GPIO_PinNum = GPIO_PIN6;
+    GPIO_Init(&USART2Pins);
+
+    // RX
+    USART2Pins.GPIO_PinConfig.GPIO_PinNum = GPIO_PIN7;
+    GPIO_Init(&USART2Pins);
+}
+
+void USART2_Inits(void)
+{
+    USART2_GPIOInits();
+    husart6.pUSARTx                        = USART6;
+    husart6.USARTConfig.USART_Mode         = USART_MODE_TXRX;
+    husart6.USARTConfig.USART_BaudRate     = USART_STD_BAUD_9600;
+    husart6.USARTConfig.USART_NoOfStopBits = USART_STOPBITS_1;
+    husart6.USARTConfig.USART_WordLength   = USART_WORDLEN_8BITS;
+    husart6.USARTConfig.USART_ParityCtrl   = USART_PARITY_DISABLE;
+    husart6.USARTConfig.USART_HW_Flow      = USART_HW_FLOW_CTRL_NONE;
+
+    USART_Init(&husart6);
 }
 
 int main(void)
 {
+
     Systick_Init(1);
     GPIO_PinConfig();
+    USART2_Inits();
+
+    USART_IRQInterruptConfig(USART6_IRQn, ENABLE);
+    USART_ReceiveDataIT(&husart6, rxBuffer, 5);
     /* Loop forever */
     while (1)
     {
-        if (g_button_flag)
-        {
-            GPIO_ToggleOutputPin(GPIOA, GPIO_PIN5);
-            g_button_flag = RESET;
-        }
         if (g_led1_flag >= 3)
         {
             GPIO_ToggleOutputPin(GPIOA, GPIO_PIN8);
@@ -69,15 +109,40 @@ int main(void)
     }
 }
 
-void EXTI15_10_IRQHandler()
+void EXTI15_10_IRQHandler(void)
 {
     GPIO_IRQHandling(GPIO_PIN13);
-    g_button_flag = SET;
 }
 
-void SysTick_Handler()
+void USART6_IRQHandler(void)
+{
+    USART_IRQHandling(&husart6);
+}
+
+void GPIO_ApplicationEventCallback(uint8_t pinNum)
+{
+    if (pinNum == GPIO_PIN13)
+    {
+        USART_SendDataIT(&husart6, txData, 13);
+    }
+}
+void SysTick_Handler(void)
 {
     g_led1_flag++;
     g_led2_flag++;
     g_led3_flag++;
+}
+
+void USART_ApplicationEventCallback(USART_Handle_t* pUSARTHandle, uint8_t event)
+{
+    if (event == USART_EVENT_RX_CMPLT)
+    {
+        USART_SendData(&husart6, rxBuffer, 5);
+        USART_ReceiveDataIT(&husart6, rxBuffer, 5);
+        GPIO_ToggleOutputPin(GPIOC, GPIO_PIN8);
+    }
+    else if (event == USART_EVENT_TX_CMPLT)
+    {
+        GPIO_ToggleOutputPin(GPIOA, GPIO_PIN5);
+    }
 }

@@ -19,7 +19,7 @@ __s_inline uint8_t GPIO_PortToIndex(GPIOx_Reg_t* port)
     return 0xFFU;
 }
 
-void GPIO_PeriClockEN(GPIOx_Reg_t* pGPIOx, uint8_t ENoDI)
+void GPIO_PeriClockControl(GPIOx_Reg_t* pGPIOx, uint8_t ENoDI)
 {
     if (ENoDI == ENABLE)
         Px_PCLK_EN(GPIO_PortToIndex(pGPIOx));
@@ -30,7 +30,7 @@ void GPIO_PeriClockEN(GPIOx_Reg_t* pGPIOx, uint8_t ENoDI)
 void GPIO_Init(GPIO_Handle_t* hgpio)
 {
     // ENABLE GPIO PERIPHERAL CLOCK
-    GPIO_PeriClockEN(hgpio->pGPIOx, ENABLE);
+    GPIO_PeriClockControl(hgpio->pGPIOx, ENABLE);
 
     // CONFIGURE THE MODE
     if (hgpio->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_ANALOG)
@@ -138,7 +138,7 @@ void GPIO_IRQConfig(GPIO_Handle_t* hgpio)
 void GPIO_IRQHandling(uint8_t pinNum)
 {
     if (EXTI->PR & (1 << pinNum))
-        EXTI->PR |= (1 << pinNum);
+        EXTI->PR |= (1 << pinNum); // clear pending flag
 
     GPIO_ApplicationEventCallback(pinNum);
 }
